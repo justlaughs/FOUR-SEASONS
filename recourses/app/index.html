@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<!-- Created with https://packager.turbowarp.org/ -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+  <title>Four Seasons</title>
+  <style>
+    body {
+      color: #ffffff;
+      font-family: sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    :root, body.is-fullscreen {
+      background-color: #000000;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    h1 {
+      font-weight: normal;
+    }
+    a {
+      color: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #app, #loading, #error, #launch {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #000000;
+    }
+    #launch {
+      background-color: rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+    }
+    .green-flag {
+      width: 80px;
+      height: 80px;
+      padding: 16px;
+      border-radius: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      border: 3px solid hsla(0, 100%, 100%, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    #loading {
+      
+    }
+    .progress-bar-outer {
+      border: 1px solid currentColor;
+      height: 10px;
+      width: 200px;
+      max-width: 200px;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background-color: currentColor;
+    }
+    .loading-text {
+      font-weight: normal;
+      font-size: 36px;
+      margin: 0 0 16px;
+    }
+    .loading-image {
+      margin: 0 0 16px;
+    }
+    #error-message, #error-stack {
+      font-family: monospace;
+      max-width: 600px;
+      white-space: pre-wrap;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #error-stack {
+      text-align: left;
+      max-height: 200px;
+      overflow: auto;
+    }
+    .control-button {
+      width: 2rem;
+      height: 2rem;
+      padding: 0.375rem;
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+      border: 0;
+      border-radius: 4px;
+    }
+    .control-button:hover {
+      background: #ff4c4c26;
+    }
+    .control-button.active {
+      background: #ff4c4c59;
+    }
+    .fullscreen-button {
+      background: white !important;
+    }
+    .standalone-fullscreen-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 0 0 0 4px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    .sc-canvas {
+      cursor: auto;
+    }
+    
+  </style>
+  <meta name="theme-color" content="#000000">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI0NC4wMDgwMiIgaGVpZ2h0PSI0My43NjMxNiIgdmlld0JveD0iMCwwLDQ0LjAwODAyLDQzLjc2MzE2Ij48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMjE3Ljk5NTk5LC0xNTguMTE4NDIpIj48ZyBkYXRhLXBhcGVyLWRhdGE9InsmcXVvdDtpc1BhaW50aW5nTGF5ZXImcXVvdDs6dHJ1ZX0iIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSJub25lIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBzdHlsZT0ibWl4LWJsZW5kLW1vZGU6IG5vcm1hbCI+PHBhdGggZD0iTTIxOC4wMjg1OSwxNzAuNzk1ODRjMCwtNy4wMDE1NSA1LjM5MDk3LC0xMi42Nzc0MiAxMi4wNDEwNywtMTIuNjc3NDJjNi42NTAxLDAgMTIuMDQxMDcsNS42NzU4OCAxMi4wNDEwNywxMi42Nzc0MmMwLDcuMDAxNTUgLTUuMzkwOTcsMTIuNjc3NDIgLTEyLjA0MTA3LDEyLjY3NzQyYy02LjY1MDEsMCAtMTIuMDQxMDcsLTUuNjc1ODggLTEyLjA0MTA3LC0xMi42Nzc0MnoiIGRhdGEtcGFwZXItZGF0YT0ieyZxdW90O29yaWdQb3MmcXVvdDs6bnVsbH0iIGZpbGw9IiNmZjExMTEiIHN0cm9rZS13aWR0aD0iTmFOIi8+PHBhdGggZD0iTTIxNy45OTU5OSwxODkuMTY5ODNjMCwtNy4wMDE1NSA1LjM5MDk4LC0xMi42Nzc0MiAxMi4wNDEwNywtMTIuNjc3NDJjNi42NTAxLDAgMTIuMDQxMDcsNS42NzU4OCAxMi4wNDEwNywxMi42Nzc0MmMwLDcuMDAxNTUgLTUuMzkwOTcsMTIuNjc3NDIgLTEyLjA0MTA3LDEyLjY3NzQyYy02LjY1MDEsMCAtMTIuMDQxMDcsLTUuNjc1ODcgLTEyLjA0MTA3LC0xMi42Nzc0MnoiIGRhdGEtcGFwZXItZGF0YT0ieyZxdW90O29yaWdQb3MmcXVvdDs6bnVsbH0iIGZpbGw9IiNmZjExMTEiIHN0cm9rZS13aWR0aD0iTmFOIi8+PHBhdGggZD0iTTIxOC4wMjg1OSwxODkuNzI1MTR2LTE5LjYyMzk1aDExLjA1MTR2MTkuNjIzOTV6IiBkYXRhLXBhcGVyLWRhdGE9InsmcXVvdDtvcmlnUG9zJnF1b3Q7Om51bGx9IiBmaWxsPSIjZmYxMTExIiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNMjM3LjMyNzI4LDE4My45OTQyNXYtNi4wNzgyMmg2LjkyNzc0djYuMDc4MjJ6IiBkYXRhLXBhcGVyLWRhdGE9InsmcXVvdDtvcmlnUG9zJnF1b3Q7Om51bGx9IiBmaWxsPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNMjI4LjA5MDMsMjAxLjg4MTU4di0xMS45ODI3N2gyMS45Mzc4NHYxMS45ODI3N3oiIGRhdGEtcGFwZXItZGF0YT0ieyZxdW90O29yaWdQb3MmcXVvdDs6bnVsbH0iIGZpbGw9IiNmZjExMTEiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0yMzAuMzk5NTQsMTY4LjE5MDg5di0xMC4wNzI0N2gyMC42MTgyN3YxMC4wNzI0N3oiIGRhdGEtcGFwZXItZGF0YT0ieyZxdW90O29yaWdQb3MmcXVvdDs6bnVsbH0iIGZpbGw9IiNmZjExMTEiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0yNDkuOTYyOTQsMTgzLjYxMjZjLTYuNjUwMSwwIC0xMi4wNDEwNywtNS42NzU4NyAtMTIuMDQxMDcsLTEyLjY3NzQyYzAsLTcuMDAxNTUgNS4zOTA5OCwtMTIuNjc3NDIgMTIuMDQxMDcsLTEyLjY3NzQyYzYuNjUwMSwwIDEyLjA0MTA3LDUuNjc1ODggMTIuMDQxMDcsMTIuNjc3NDJjMCw3LjAwMTU1IC01LjM5MDk3LDEyLjY3NzQyIC0xMi4wNDEwNywxMi42Nzc0MnoiIGRhdGEtcGFwZXItZGF0YT0ieyZxdW90O29yaWdQb3MmcXVvdDs6bnVsbCwmcXVvdDtpbmRleCZxdW90OzpudWxsfSIgZmlsbD0iI2ZmMTExMSIgc3Ryb2tlLXdpZHRoPSJOYU4iLz48cGF0aCBkPSJNMjQ5LjgzMDU4LDIwMS44MTI5MmMtNi42NTAxLDAgLTEyLjA0MTA3LC01LjY3NTg3IC0xMi4wNDEwNywtMTIuNjc3NDJjMCwtNy4wMDE1NSA1LjM5MDk3LC0xMi42Nzc0MiAxMi4wNDEwNywtMTIuNjc3NDJjNi42NTAxLDAgMTIuMDQxMDcsNS42NzU4OCAxMi4wNDEwNywxMi42Nzc0MmMwLDcuMDAxNTUgLTUuMzkwOTgsMTIuNjc3NDIgLTEyLjA0MTA3LDEyLjY3NzQyeiIgZGF0YS1wYXBlci1kYXRhPSJ7JnF1b3Q7b3JpZ1BvcyZxdW90OzpudWxsLCZxdW90O2luZGV4JnF1b3Q7Om51bGx9IiBmaWxsPSIjZmYxMTExIiBzdHJva2Utd2lkdGg9Ik5hTiIvPjxwYXRoIGQ9Ik0yNTAuOTUyNiwxODkuODY0NDd2LTE5LjYyMzk1aDExLjA1MTM5djE5LjYyMzk1eiIgZGF0YS1wYXBlci1kYXRhPSJ7JnF1b3Q7aW5kZXgmcXVvdDs6bnVsbCwmcXVvdDtvcmlnUG9zJnF1b3Q7Om51bGx9IiBmaWxsPSIjZmYxMTExIiBzdHJva2Utd2lkdGg9IjAiLz48cGF0aCBkPSJNMjI2LjA2MjUsMTgwYzAsLTcuNjk3NDcgNi4yNDAwMywtMTMuOTM3NSAxMy45Mzc1LC0xMy45Mzc1YzcuNjk3NDcsMCAxMy45Mzc1LDYuMjQwMDMgMTMuOTM3NSwxMy45Mzc1YzAsNy42OTc0NyAtNi4yNDAwMywxMy45Mzc1IC0xMy45Mzc1LDEzLjkzNzVjLTcuNjk3NDcsMCAtMTMuOTM3NSwtNi4yNDAwMyAtMTMuOTM3NSwtMTMuOTM3NXoiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMCIvPjxwYXRoIGQ9Ik0yMzEuMzc1LDE4MGMwLC00Ljc2MzQ2IDMuODYxNTQsLTguNjI1IDguNjI1LC04LjYyNWM0Ljc2MzQ2LDAgOC42MjUsMy44NjE1NCA4LjYyNSw4LjYyNWMwLDQuNzYzNDYgLTMuODYxNTQsOC42MjUgLTguNjI1LDguNjI1Yy00Ljc2MzQ2LDAgLTguNjI1LC0zLjg2MTU0IC04LjYyNSwtOC42MjV6IiBmaWxsPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAiLz48L2c+PC9nPjwvc3ZnPg==">
+</head>
+<body>
+  <noscript>Enable JavaScript</noscript>
+
+  <div id="app"></div>
+
+  <div id="launch" class="screen" hidden title="Click to start">
+    <div class="green-flag">
+      <svg viewBox="0 0 16.63 17.5" width="42" height="44">
+        <defs><style>.cls-1,.cls-2{fill:#4cbf56;stroke:#45993d;stroke-linecap:round;stroke-linejoin:round;}.cls-2{stroke-width:1.5px;}</style></defs>
+        <path class="cls-1" d="M.75,2A6.44,6.44,0,0,1,8.44,2h0a6.44,6.44,0,0,0,7.69,0V12.4a6.44,6.44,0,0,1-7.69,0h0a6.44,6.44,0,0,0-7.69,0"/>
+        <line class="cls-2" x1="0.75" y1="16.75" x2="0.75" y2="0.75"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="loading" class="screen">
+    <h1 class="loading-text">WAIT</h1>
+    
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="loading-inner"></div></div>
+  </div>
+
+  <div id="error" class="screen" hidden>
+    <h1>Error</h1>
+    <details>
+      <summary id="error-message"></summary>
+      <p id="error-stack"></p>
+    </details>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const appElement = document.getElementById('app');
+    const launchScreen = document.getElementById('launch');
+    const loadingScreen = document.getElementById('loading');
+    const loadingInner = document.getElementById('loading-inner');
+    const errorScreen = document.getElementById('error');
+    const errorScreenMessage = document.getElementById('error-message');
+    const errorScreenStack = document.getElementById('error-stack');
+
+    const handleError = (error) => {
+      console.error(error);
+      if (!errorScreen.hidden) return;
+      errorScreen.hidden = false;
+      errorScreenMessage.textContent = '' + error;
+      let debug = error && error.stack || 'no stack';
+      debug += '\nUser agent: ' + navigator.userAgent;
+      errorScreenStack.textContent = debug;
+    };
+    const setProgress = (progress) => {
+      if (loadingInner) loadingInner.style.width = progress * 100 + '%';
+    };
+    const interpolate = (a, b, t) => a + t * (b - a);
+
+    try {
+      setProgress(0.1);
+
+      const scaffolding = new Scaffolding.Scaffolding();
+      scaffolding.width = 480;
+      scaffolding.height = 360;
+      scaffolding.resizeMode = "preserve-ratio";
+      scaffolding.editableLists = false;
+      scaffolding.setup();
+      scaffolding.appendTo(appElement);
+
+      const vm = scaffolding.vm;
+      window.scaffolding = scaffolding;
+      window.vm = scaffolding.vm;
+      window.Scratch = {
+        vm,
+        renderer: vm.renderer,
+        audioEngine: vm.runtime.audioEngine,
+        bitmapAdapter: vm.runtime.v2BitmapAdapter,
+        videoProvider: vm.runtime.ioDevices.video.provider
+      };
+
+      scaffolding.setUsername("player####".replace(/#/g, () => Math.floor(Math.random() * 10)));
+      scaffolding.setAccentColor("#ff4c4c");
+
+      scaffolding.addCloudProvider(new Scaffolding.Cloud.WebSocketProvider(["wss://clouddata.turbowarp.org","wss://clouddata.turbowarp.xyz"], "p4-@Four Seasons.sb3"));
+
+      vm.setTurboMode(false);
+      if (vm.setInterpolation) vm.setInterpolation(false);
+      if (vm.setFramerate) vm.setFramerate(30);
+      if (vm.renderer.setUseHighQualityRender) vm.renderer.setUseHighQualityRender(false);
+      if (vm.setRuntimeOptions) vm.setRuntimeOptions({
+        fencing: true,
+        miscLimits: true,
+        maxClones: 300,
+      });
+      if (vm.setCompilerOptions) vm.setCompilerOptions({
+        enabled: true,
+        warpTimer: false
+      });
+
+      if (typeof ScaffoldingAddons !== 'undefined') {
+        ScaffoldingAddons.run(scaffolding, {"gamepad":false,"pointerlock":false,"specialCloudBehaviors":false,"unsafeCloudBehaviors":false,"pause":false});
+      }
+
+      for (const extension of []) {
+        vm.extensionManager.loadExtensionURL(extension);
+      }
+
+    } catch (e) {
+      handleError(e);
+    }
+  </script>
+  <script></script>
+  
+    <script>
+      const getProjectData = (function() {
+        const storage = scaffolding.storage;
+        storage.onprogress = (total, loaded) => {
+          setProgress(interpolate(0.2, 0.98, loaded / total));
+        };
+        
+        storage.addWebStore(
+          [storage.AssetType.ImageVector, storage.AssetType.ImageBitmap, storage.AssetType.Sound],
+          (asset) => new URL('./assets/' + asset.assetId + '.' + asset.dataFormat, location).href
+        );
+        return () => new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.onerror = () => {
+          if (location.protocol === 'file:') {
+            reject(new Error('Zip environment must be used from a website, not from a file URL.'));
+          } else {
+            reject(new Error('Request to load project data failed.'));
+          }
+        };
+        xhr.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setProgress(interpolate(0.1, 0.2, e.loaded / e.total));
+          }
+        };
+        xhr.responseType = 'arraybuffer';
+        xhr.open('GET', "./assets/project.json");
+        xhr.send();
+      });
+      })();
+    </script>
+  <script>
+    const run = async () => {
+      const projectData = await getProjectData();
+      await scaffolding.loadProject(projectData);
+      setProgress(1);
+      loadingScreen.hidden = true;
+      if (true) {
+        scaffolding.start();
+      } else {
+        launchScreen.hidden = false;
+        launchScreen.addEventListener('click', () => {
+          launchScreen.hidden = true;
+          scaffolding.start();
+        });
+        launchScreen.focus();
+      }
+    };
+    run().catch(handleError);
+  </script>
+</body>
+</html>
